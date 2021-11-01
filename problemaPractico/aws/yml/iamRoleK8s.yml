@@ -1,0 +1,68 @@
+service: kubernetesRole
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: "us-east-1"
+  prefix: ${self:custom.stage}-${self:service}
+
+provider:
+  name: aws
+  stage: ${self:custom.stage}
+  region: ${self:custom.region}
+  stackTags:
+    Responsable: "Gerardo"
+    Version: "0.0.1"
+    Funcionalidad: "Rol kubernetes"
+    Criticidad: "Alta"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - iam:DeleteRole
+            - iam:DeleteRolePolicy
+          Resource:
+            - "arn:aws:iam::*:role/${self:custom.prefix}-${self:custom.region}-role"
+
+resources:
+  Resources:
+    kubernetesUserRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: kubernetesUserRole
+        AssumeRolePolicyDocument:
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+                - ec2.amazonaws.com
+            Action: sts:AssumeRole
+          Version: '2012-10-17'
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+          - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+    kubernetesRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: kubernetesRole
+        AssumeRolePolicyDocument:
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+                - ec2.amazonaws.com
+            Action: sts:AssumeRole
+          Version: '2012-10-17'
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AutoScalingFullAccess
+          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+          - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+          # si quisiera mas recursos, como dynamo, tendria que agregarlos aca
