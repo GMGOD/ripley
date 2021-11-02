@@ -1,0 +1,34 @@
+input UsuarioInput {
+	Nombre: String
+	Email: String!
+}
+
+input ModificarUsuarioInput {
+	Id: Int!
+	Nombre: String
+	Email: String!
+}
+
+type Usuario {
+	Id: Int
+	Nombre: String
+	Email: String
+}
+
+type BasicResponse {
+	Success: Boolean
+}
+
+type Mutation {
+	crearUsuario(input:UsuarioInput!): Usuario
+	modificarUsuario(input: ModificarUsuarioInput!): Usuario
+}
+
+type Query {
+	obtenerUsuario(email:String!): Usuario
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}
