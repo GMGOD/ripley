@@ -16,3 +16,26 @@ exports.obtenerUsuario = async (client, email, fields) => {
 	return usuarios;
 
 }
+
+exports.obtenerTodosLosUsuarios = async (client, fields) => {
+	let usuarios = [];
+
+	let usuariosDB = await client.query(`
+        SELECT id, nombre, email FROM usuarios
+    `, [])
+
+	if (usuariosDB.length == 0) {
+		return null;
+	}
+
+	usuarios = usuariosDB.map(usuario => {
+		return {
+			Id: usuario.id,
+			Nombre: usuario.nombre,
+			Email: usuario.email
+		}
+	});
+
+	return usuarios;
+
+}

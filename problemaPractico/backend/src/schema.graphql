@@ -19,13 +19,15 @@ type BasicResponse {
 	Success: Boolean
 }
 
+
+type Query {
+	obtenerUsuario(email:String!): Usuario,
+	obtenerTodosLosUsuarios: [Usuario],
+}
+
 type Mutation {
 	crearUsuario(input:UsuarioInput!): Usuario
 	modificarUsuario(input: ModificarUsuarioInput!): Usuario
-}
-
-type Query {
-	obtenerUsuario(email:String!): Usuario
 }
 
 schema {

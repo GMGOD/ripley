@@ -4,6 +4,7 @@ const { importSchema } = require('graphql-import')
 
 const querys = require("./src/querys")
 const mutations = require("./src/mutations")
+const { query } = require('express')
 
 const typeDefs = importSchema('./src/schema.graphql')
 
@@ -11,6 +12,7 @@ const typeDefs = importSchema('./src/schema.graphql')
 const resolvers = {
 	Query: {
 		obtenerUsuario: querys.obtenerUsuario,
+		obtenerTodosLosUsuarios: querys.obtenerTodosLosUsuarios,
 	},
 	Mutation: {
 		crearUsuario: mutations.crearUsuario,

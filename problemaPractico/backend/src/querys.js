@@ -33,3 +33,11 @@ exports.obtenerUsuario = async (_, { email }, context, info) => {
     return resp
 
 }
+
+exports.obtenerTodosLosUsuarios = async (_, { email }, context, info) => {
+
+    let resp = await aurora.obtenerTodosLosUsuarios(mysql, graphqlFields(info))
+
+    return resp
+
+}
