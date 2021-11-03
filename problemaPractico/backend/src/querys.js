@@ -31,3 +31,27 @@ exports.obtenerTodosLosUsuarios = async (_, { email }, context, info) => {
     return resp
 
 }
+
+exports.obtenerTodasMisInversiones = async (_, { email }, context, info) => {
+
+    let resp = await aurora.obtenerTodasMisInversiones(mysql, email, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerInstrumentos = async (_, { }, context, info) => {
+
+    let resp = await aurora.obtenerInstrumentos(mysql, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerInversiones = async (_, { email }, context, info) => {
+
+    let resp = await aurora.obtenerInversiones(mysql, email, graphqlFields(info))
+
+    return resp
+
+}

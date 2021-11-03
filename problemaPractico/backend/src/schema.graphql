@@ -19,15 +19,46 @@ type BasicResponse {
 	Success: Boolean
 }
 
+type Instrumento {
+	Id: Int
+	Nombre: String
+	PrecioApertura: Float
+	PrecioCierre: Float
+	Codigo: String
+}
+
+type Cartera {
+	Id: Int
+	IdUsuario: Int
+	Descripcion: String
+	EstadoActivo: Int
+	OrdenInversiones [OrdenInversiones]
+}
+
+type OrdenInversiones {
+	Id: Int
+	IdCartera: Int
+	TipoOrden: String
+	Instrumento: Instrumento
+	EstadoOrden: String
+	FechaInstroduccion: String
+	FechaEjecucion: String
+	Cantidad: Int
+	PrecioEjecucion: Float
+}
 
 type Query {
-	obtenerUsuario(email:String!): Usuario,
-	obtenerTodosLosUsuarios: [Usuario],
+	obtenerUsuario(email:String!): Usuario
+	obtenerTodosLosUsuarios: [Usuario]
+	obtenerTodasMisInversiones(email:String!): [Cartera]
+	obtenerInstrumentos: [Instrumento]
+	obtenerInstrumentos: [OrdenInversiones]
 }
 
 type Mutation {
 	crearUsuario(input:UsuarioInput!): Usuario
 	modificarUsuario(input: ModificarUsuarioInput!): Usuario
+	actualizarInstrumentos: [Instrumento]
 }
 
 schema {

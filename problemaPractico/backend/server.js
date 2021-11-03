@@ -13,10 +13,13 @@ const resolvers = {
 	Query: {
 		obtenerUsuario: querys.obtenerUsuario,
 		obtenerTodosLosUsuarios: querys.obtenerTodosLosUsuarios,
+		obtenerTodasMisInversiones: querys.obtenerTodasMisInversiones,
+		obtenerInstrumentos: querys.obtenerInstrumentos
 	},
 	Mutation: {
 		crearUsuario: mutations.crearUsuario,
 		modificarUsuario: mutations.modificarUsuario,
+		actualizarInstrumentos: mutations.actualizarInstrumentos
 	}
 };
 

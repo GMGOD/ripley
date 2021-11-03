@@ -3,7 +3,8 @@ let aurora = require('./common/aurora')
 const mysql = require('./conn')
 const dotenv = require('dotenv')
 const path = require('path')
-const graphqlFields = require('graphql-fields')
+const graphqlFields = require('graphql-fields');
+const { default: axios } = require('axios');
 
 dotenv.config({ path: path.join(path.resolve(process.cwd()), '/.env') }).parsed
 
@@ -12,7 +13,9 @@ const config = {
     DB_NAME: process.env.DB_NAME,
     USERNAME: process.env.DB_USERNAME,
     PASSWORD: process.env.DB_PASSWORD,
-    REGION: process.env.DB_REGION
+    REGION: process.env.DB_REGION,
+    TOKEN: process.env.TOKEN,
+    BOLSA_SANTIAGO: process.env.BOLSA_SANTIAGO
 }
 
 console.log('config mutation 🚀', config.AURORA_HOST)
@@ -68,4 +71,47 @@ exports.modificarUsuario = async (_, obj, context, info) => {
     let resp = await aurora.obtenerUsuario(mysql, obj.input.Email, graphqlFields(info))
 
     return resp;
+}
+
+exports.actualizarInstrumentos = async (_, obj, context, info) => {
+    //InstrumentosDisponibles/getInstrumentosValidos
+    //TickerOnDemand/getIndiceses
+
+    let options = {
+        method: 'POST',
+        url: `${config.BOLSA_SANTIAGO}ClienteMD/getInstrumentosRV`,
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        params: {
+            'access_token': config.TOKEN
+        },
+        data: {}
+    }
+
+    await axios(options)
+        .then(async resp => {
+            let instrumentosDB = await mysql.query(`
+                SELECT * FROM instrumentos
+            `, [])
+            if (instrumentosDB.length > 0) {
+                await mysql.query(`
+                    TRUNCATE TABLE instrumentos
+                `, [])
+            }
+            await Promise.all(resp.data.listaResult.map(async x => {
+                await mysql.query('INSERT INTO instrumentos (nombre, precioApertura, precioCierre, codigo)VALUES(?,?,?,?)', [
+                    x.instruments, x.openPrice, x.closingPrice, x.codIsin
+                ])
+            }))
+        })
+        .catch(error => {
+            throw error.toString()
+        })
+
+    let resp = await aurora.obtenerInstrumentos(mysql, graphqlFields(info))
+
+    return resp;
+
 }
