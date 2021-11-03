@@ -9,6 +9,25 @@ input ModificarUsuarioInput {
 	Email: String!
 }
 
+input CarteraInput {
+	Email: String!
+	Descripcion: String
+}
+
+input Invertir {
+	IdCartera: Int!
+	IdTipoOrden: Int!
+	IdInstrumento: Int!
+	Cantidad: Int!
+	Precio: Float!
+}
+
+input ModificarInversion {
+	IdInversion: Int!
+	Cantidad: Int!
+	Precio: Float!
+}
+
 type Usuario {
 	Id: Int
 	Nombre: String
@@ -31,8 +50,8 @@ type Cartera {
 	Id: Int
 	IdUsuario: Int
 	Descripcion: String
-	EstadoActivo: Int
-	OrdenInversiones [OrdenInversiones]
+	EstadoActivo: Boolean
+	OrdenInversiones: [OrdenInversiones]
 }
 
 type OrdenInversiones {
@@ -47,18 +66,32 @@ type OrdenInversiones {
 	PrecioEjecucion: Float
 }
 
+type TipoOrden {
+	Id: Int
+	Descripcion: String
+}
+
 type Query {
-	obtenerUsuario(email:String!): Usuario
+	obtenerUsuario(email: String!): Usuario
 	obtenerTodosLosUsuarios: [Usuario]
-	obtenerTodasMisInversiones(email:String!): [Cartera]
+	obtenerTodasMisInversiones(email: String!): [Cartera]
 	obtenerInstrumentos: [Instrumento]
-	obtenerInstrumentos: [OrdenInversiones]
+	obtenerInstrumento(idInstrumento: Int!): Instrumento
+	obtenerInversiones(email: String!): [OrdenInversiones]
+	obtenerInversion(idInversion: Int!): OrdenInversiones
+	obtenerCartera(idCartera: Int!): Cartera
+	obtenerTodosLosTipoOrden: [TipoOrden]
+	obtenerTipoOrden(idTipoOrden: Int!): TipoOrden
+	
 }
 
 type Mutation {
-	crearUsuario(input:UsuarioInput!): Usuario
+	crearUsuario(input: UsuarioInput!): Usuario
 	modificarUsuario(input: ModificarUsuarioInput!): Usuario
 	actualizarInstrumentos: [Instrumento]
+	crearCartera(input: CarteraInput!): Cartera
+	invertir(input: Invertir!): OrdenInversiones
+	modificarInversion(input: ModificarInversion!): OrdenInversiones
 }
 
 schema {

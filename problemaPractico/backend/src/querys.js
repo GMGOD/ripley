@@ -48,9 +48,49 @@ exports.obtenerInstrumentos = async (_, { }, context, info) => {
 
 }
 
+exports.obtenerInstrumento = async (_, { idInstrumento }, context, info) => {
+
+    let resp = await aurora.obtenerInstrumento(mysql, idInstrumento, graphqlFields(info))
+
+    return resp
+
+}
+
 exports.obtenerInversiones = async (_, { email }, context, info) => {
 
     let resp = await aurora.obtenerInversiones(mysql, email, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerInversion = async (_, { idInversion }, context, info) => {
+
+    let resp = await aurora.obtenerInversion(mysql, idInversion, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerCartera = async (_, { idCartera }, context, info) => {
+
+    let resp = await aurora.obtenerCartera(mysql, idCartera, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerTodosLosTipoOrden = async (_, { }, context, info) => {
+
+    let resp = await aurora.obtenerTodosLosTipoOrden(mysql, graphqlFields(info))
+
+    return resp
+
+}
+
+exports.obtenerTipoOrden = async (_, { idTipoOrden }, context, info) => {
+
+    let resp = await aurora.obtenerTipoOrden(mysql, idTipoOrden, graphqlFields(info))
 
     return resp
 

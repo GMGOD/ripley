@@ -14,12 +14,21 @@ const resolvers = {
 		obtenerUsuario: querys.obtenerUsuario,
 		obtenerTodosLosUsuarios: querys.obtenerTodosLosUsuarios,
 		obtenerTodasMisInversiones: querys.obtenerTodasMisInversiones,
-		obtenerInstrumentos: querys.obtenerInstrumentos
+		obtenerInstrumentos: querys.obtenerInstrumentos,
+		obtenerInstrumento: querys.obtenerInstrumento,
+		obtenerInversiones: querys.obtenerInversiones,
+		obtenerInversion: querys.obtenerInversion,
+		obtenerCartera: querys.obtenerCartera,
+		obtenerTodosLosTipoOrden: querys.obtenerTodosLosTipoOrden,
+		obtenerTipoOrden: querys.obtenerTipoOrden
 	},
 	Mutation: {
 		crearUsuario: mutations.crearUsuario,
 		modificarUsuario: mutations.modificarUsuario,
-		actualizarInstrumentos: mutations.actualizarInstrumentos
+		actualizarInstrumentos: mutations.actualizarInstrumentos,
+		crearCartera: mutations.crearCartera,
+		invertir: mutations.invertir,
+		modificarInversion: mutations.modificarInversion
 	}
 };
 

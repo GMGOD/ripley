@@ -22,8 +22,6 @@ console.log('config mutation 🚀', config.AURORA_HOST)
 
 exports.crearUsuario = async (_, obj, context, info) => {
 
-    let insert = null
-
     let select = await mysql.query('SELECT id FROM usuarios WHERE email = ?', [obj.input.Email])
 
     if (select.length > 0) {
@@ -49,8 +47,6 @@ exports.crearUsuario = async (_, obj, context, info) => {
 
 exports.modificarUsuario = async (_, obj, context, info) => {
 
-    let insert = null
-
     let select = await mysql.query('SELECT id FROM usuarios WHERE id = ?', [obj.input.Id])
 
     if (select.length == 0) {
@@ -74,8 +70,6 @@ exports.modificarUsuario = async (_, obj, context, info) => {
 }
 
 exports.actualizarInstrumentos = async (_, obj, context, info) => {
-    //InstrumentosDisponibles/getInstrumentosValidos
-    //TickerOnDemand/getIndiceses
 
     let options = {
         method: 'POST',
@@ -114,4 +108,100 @@ exports.actualizarInstrumentos = async (_, obj, context, info) => {
 
     return resp;
 
+}
+
+exports.crearCartera = async (_, obj, context, info) => {
+    let insert = null
+    let resp = []
+    let usuario = await aurora.obtenerUsuario(mysql, obj.input.Email, graphqlFields(info))
+
+    if (usuario && Object.keys(usuario).length > 0 && usuario.Id) {
+        try {
+            insert = await mysql.query('INSERT INTO cartera (idUsuario, descripcion, estadoActivo)values(?,?,?)', [usuario.Id, obj.input.Descripcion, 1])
+        } catch (error) {
+            if (error.errno === 1062) {
+                throw `Cartera ya existe`
+            } else {
+                console.debug(error)
+                throw `Error no controlado`
+            }
+        }
+    } else {
+        throw `Usuario ${obj.input.Email} no existe`
+    }
+
+    if (insert) {
+        resp = await aurora.obtenerCartera(mysql, insert.insertId, graphqlFields(info))
+    }
+
+    return resp;
+}
+
+exports.invertir = async (_, obj, context, info) => {
+    let cartera = await aurora.obtenerCartera(mysql, obj.input.IdCartera, graphqlFields(info))
+    let tipoOrden = await aurora.obtenerTipoOrden(mysql, obj.input.IdTipoOrden, graphqlFields(info))
+    let instrumento = await aurora.obtenerInstrumento(mysql, obj.input.IdInstrumento, graphqlFields(info))
+
+    if (!cartera || Object.keys(cartera) === 0) {
+        throw `Cartera ${obj.input.IdCartera} no existe`
+    }
+
+    if (!tipoOrden || Object.keys(tipoOrden) === 0) {
+        throw `TipoOrden ${obj.input.IdTipoOrden} no existe`
+    }
+
+    if (!instrumento || Object.keys(instrumento) === 0) {
+        throw `Instrumento ${obj.input.IdInstrumento} no existe`
+    }
+
+    try {
+        // TODO: Cuando se ingresa un, el estado es 3 (terminada), por simpleza, ya que es un MVP no lidiamos ahora con diferentes
+        // TODO> estados, el ideal seria, 1 inciada -> 2 espera -> 3 terminada
+        insert = await mysql.query(`
+            INSERT INTO ordenInversiones (
+                idCartera, idTipoOrden, idInstrumento, idEstadoOrden, fechaIntroduccion,
+                fechaEjecucion, cantidad, precioEjecucion
+            )values(?, ?, ?, ?, ?, ?, ?, ?)
+        `, [cartera.Id, tipoOrden.Id, instrumento.Id, 3, new Date(), new Date(), obj.input.Cantidad, obj.input.Precio])
+    } catch (error) {
+        if (error.errno === 1062) {
+            throw `Inversion ya existe`
+        } else {
+            console.debug(error)
+            throw `Error no controlado`
+        }
+    }
+
+    if (insert) {
+        resp = await aurora.obtenerInversion(mysql, insert.insertId, graphqlFields(info))
+    }
+
+    return resp;
+}
+
+exports.modificarInversion = async (_, obj, context, info) => {
+    let inversion = await aurora.obtenerInversion(mysql, obj.input.IdInversion, graphqlFields(info))
+
+    if (!inversion || Object.keys(inversion) === 0) {
+        throw `Inversion ${obj.input.IdInversion} no existe`
+    }
+
+    try {
+        update = await mysql.query(`
+            UPDATE ordenInversiones SET fechaIntroduccion = ?, cantidad = ?, precioEjecucion = ? WHERE id = ?
+        `, [new Date(), obj.input.Cantidad, obj.input.Precio, obj.input.IdInversion])
+    } catch (error) {
+        if (error.errno === 1062) {
+            throw `Inversion ya existe`
+        } else {
+            console.debug(error)
+            throw `Error no controlado`
+        }
+    }
+
+    if (update) {
+        resp = await aurora.obtenerInversion(mysql, obj.input.IdInversion, graphqlFields(info))
+    }
+
+    return resp;
 }
