@@ -40,7 +40,6 @@ Tambien estan publicadas en postman todos los post's y querys disponibles https:
 # Respuestas
 
 - Feature 1 (¿Que inversiones tengo?): Obtener todas las inversiones (Instrumentos y cantidad de acciones) de la cartera del señor Risopatron.
-
 ```
 query obtenerTodasMisInversiones {
   obtenerTodasMisInversiones(email: "gerardo.manuel3@gmail.com"){
@@ -70,7 +69,6 @@ query obtenerTodasMisInversiones {
 ```
 
 - Feature 2 (Quiero invertir en otra cosa!): Agregar una inversión a la cartera del señor Risopatron. (Numero de acciones, Fecha de ultima actualización, Nombre, Monto de Inversión en CLP)
-
 ```
 mutation invertir {
   invertir(input: {
@@ -100,7 +98,6 @@ mutation invertir {
 ```
 
 - Feature 3 (Quiero invertir mas): Actualizar una inversión a la cartera del señor Risopatron. (Numero de acciones, Fecha de ultima actualización, Nombre, Monto de Inversión en CLP Actualizado)
-
 ```
 mutation modificarInversion {
   modificarInversion(input: {
@@ -128,11 +125,43 @@ mutation modificarInversion {
 ```
 
 - Feature 4 (¿Como van mis inversiones en Colbun S.A?): Obtener el estado (Rentabilidad y estado de inversión) de un instrumento en particular de la cartera.
+```"Obtiene todas las ordenes asiganadas a la cartera y instrumento"```
+
+```
+query obtenerInversionPorInstrumento {
+  obtenerInversionPorInstrumento(idCartera: 1, idInstrumento: 1){
+      Instrumento{
+        Nombre
+      }
+      EstadoOrden
+      Rentabilidad
+  }
+}
+```
 
 - Feature 5 (¿Como van mis inversiones, hoy estamos ganando o perdiendo?): Obtener el estado (Rentabilidad y estado de inversión) de toda la cartera.
+```
+query obtenerCartera {
+  obtenerCartera(idCartera: 1){
+    OrdenInversiones {
+      Instrumento{
+        Nombre
+      }
+      EstadoOrden
+      Rentabilidad
+    }
+  }
+}
+```
 
 - Feature 7 (¿Desde que comence como van mis inversiones?): Obtener el monto de ganancias/perdidas vs el dinero invertido de toda la cartera.
-
+```
+query obtenerHistoricoGananciasPerdidasCartera {
+    obtenerHistoricoGananciasPerdidasCartera(email: "gerardo.manuel3@gmail.com"){
+        Resultado
+    }
+}
+```
 ### (Bonus Track)
 
 - Feature 8: Crear nuevo usuario.
@@ -176,3 +205,11 @@ query obtenerTodosLosUsuarios {
 ```
 
 - Feature 11: Comparar las inversiones de un usuario contra otro en terminos de ganancias/perdidas.
+```
+query compararHistoricoGananciasPerdidasCarteraUsuarioAB {
+    compararHistoricoGananciasPerdidasCarteraUsuarioAB(emailUsuarioA: "gerar1do.m1anuel@gma123il.com", emailUsuarioB: "gerardo.manuel3@gmail.com"){
+        Email
+        Resultado
+    }
+}
+```

@@ -86,18 +86,21 @@ exports.actualizarInstrumentos = async (_, obj, context, info) => {
 
     await axios(options)
         .then(async resp => {
-            let instrumentosDB = await mysql.query(`
-                SELECT * FROM instrumentos
-            `, [])
-            if (instrumentosDB.length > 0) {
-                await mysql.query(`
-                    TRUNCATE TABLE instrumentos
-                `, [])
-            }
             await Promise.all(resp.data.listaResult.map(async x => {
-                await mysql.query('INSERT INTO instrumentos (nombre, precioApertura, precioCierre, codigo)VALUES(?,?,?,?)', [
-                    x.instruments, x.openPrice, x.closingPrice, x.codIsin
-                ])
+                let instrumentosDB = await mysql.query(`
+                    SELECT * FROM instrumentos WHERE codigo = ?
+                `, [x.codIsin])
+
+                if (instrumentosDB.length > 0) {
+                    await mysql.query('UPDATE instrumentos SET precioApertura = ?, precioCierre = ? WHERE id = ?', [
+                        x.openPrice, x.closingPrice, instrumentosDB[0].codigo
+                    ])
+                } else {
+                    await mysql.query('INSERT INTO instrumentos (nombre, precioApertura, precioCierre, codigo)VALUES(?,?,?,?)', [
+                        x.instruments, x.openPrice, x.closingPrice, x.codIsin
+                    ])
+                }
+
             }))
         })
         .catch(error => {
@@ -139,18 +142,20 @@ exports.crearCartera = async (_, obj, context, info) => {
 
 exports.invertir = async (_, obj, context, info) => {
     let cartera = await aurora.obtenerCartera(mysql, obj.input.IdCartera, graphqlFields(info))
-    let tipoOrden = await aurora.obtenerTipoOrden(mysql, obj.input.IdTipoOrden, graphqlFields(info))
-    let instrumento = await aurora.obtenerInstrumento(mysql, obj.input.IdInstrumento, graphqlFields(info))
 
-    if (!cartera || Object.keys(cartera) === 0) {
+    if (!cartera || Object.keys(cartera).length === 0) {
         throw `Cartera ${obj.input.IdCartera} no existe`
     }
 
-    if (!tipoOrden || Object.keys(tipoOrden) === 0) {
+    let tipoOrden = await aurora.obtenerTipoOrden(mysql, obj.input.IdTipoOrden, graphqlFields(info))
+
+    if (!tipoOrden || Object.keys(tipoOrden).length === 0) {
         throw `TipoOrden ${obj.input.IdTipoOrden} no existe`
     }
 
-    if (!instrumento || Object.keys(instrumento) === 0) {
+    let instrumento = await aurora.obtenerInstrumento(mysql, obj.input.IdInstrumento, graphqlFields(info))
+
+    if (!instrumento || Object.keys(instrumento).length === 0) {
         throw `Instrumento ${obj.input.IdInstrumento} no existe`
     }
 
@@ -160,9 +165,9 @@ exports.invertir = async (_, obj, context, info) => {
         insert = await mysql.query(`
             INSERT INTO ordenInversiones (
                 idCartera, idTipoOrden, idInstrumento, idEstadoOrden, fechaIntroduccion,
-                fechaEjecucion, cantidad, precioEjecucion
-            )values(?, ?, ?, ?, ?, ?, ?, ?)
-        `, [cartera.Id, tipoOrden.Id, instrumento.Id, 3, new Date(), new Date(), obj.input.Cantidad, obj.input.Precio])
+                fechaEjecucion, cantidad, precioEjecucion, precioInstrumento
+            )values(?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [cartera.Id, tipoOrden.Id, instrumento.Id, 3, new Date(), new Date(), obj.input.Cantidad, obj.input.Precio, instrumento.PrecioApertura])
     } catch (error) {
         if (error.errno === 1062) {
             throw `Inversion ya existe`
@@ -182,21 +187,24 @@ exports.invertir = async (_, obj, context, info) => {
 exports.modificarInversion = async (_, obj, context, info) => {
     let inversion = await aurora.obtenerInversion(mysql, obj.input.IdInversion, graphqlFields(info))
 
-    if (!inversion || Object.keys(inversion) === 0) {
+    if (!inversion || Object.keys(inversion).length === 0) {
         throw `Inversion ${obj.input.IdInversion} no existe`
     }
 
+    let instrumento = await aurora.obtenerInstrumento(mysql, obj.input.IdInstrumento, graphqlFields(info))
+
+    if (!instrumento || Object.keys(instrumento).length === 0) {
+        throw `Instrumento ${obj.input.IdInstrumento} no existe`
+    }
+
+
     try {
         update = await mysql.query(`
-            UPDATE ordenInversiones SET fechaIntroduccion = ?, cantidad = ?, precioEjecucion = ? WHERE id = ?
-        `, [new Date(), obj.input.Cantidad, obj.input.Precio, obj.input.IdInversion])
+            UPDATE ordenInversiones SET fechaIntroduccion = ?, cantidad = ?, precioEjecucion = ?, precioApertura = ? WHERE id = ?
+        `, [new Date(), obj.input.Cantidad, obj.input.Precio, obj.input.IdInversion, instrumento.PrecioApertura])
     } catch (error) {
-        if (error.errno === 1062) {
-            throw `Inversion ya existe`
-        } else {
-            console.debug(error)
-            throw `Error no controlado`
-        }
+        console.debug(error)
+        throw `Error no controlado`
     }
 
     if (update) {

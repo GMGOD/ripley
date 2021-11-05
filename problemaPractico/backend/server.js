@@ -18,9 +18,12 @@ const resolvers = {
 		obtenerInstrumento: querys.obtenerInstrumento,
 		obtenerInversiones: querys.obtenerInversiones,
 		obtenerInversion: querys.obtenerInversion,
+		obtenerInversionPorInstrumento: querys.obtenerInversionPorInstrumento,
 		obtenerCartera: querys.obtenerCartera,
+		obtenerCarteras: querys.obtenerCarteras,
 		obtenerTodosLosTipoOrden: querys.obtenerTodosLosTipoOrden,
-		obtenerTipoOrden: querys.obtenerTipoOrden
+		obtenerTipoOrden: querys.obtenerTipoOrden,
+		compararHistoricoGananciasPerdidasCarteraUsuarioAB: querys.compararHistoricoGananciasPerdidasCarteraUsuarioAB
 	},
 	Mutation: {
 		crearUsuario: mutations.crearUsuario,

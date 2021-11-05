@@ -98,7 +98,7 @@ exports.obtenerTodasMisInversiones = async (client, email, fields) => {
 							estadoOrden = estadoOrdenDB[0].descripcion
 						}
 
-						return {
+						let retorno = {
 							Id: y.id,
 							IdCartera: y.idCartera,
 							TipoOrden: tipoOrden,
@@ -106,11 +106,20 @@ exports.obtenerTodasMisInversiones = async (client, email, fields) => {
 							EstadoOrden: estadoOrden,
 							FechaInstroduccion: y.fechaInstroduccion,
 							FechaEjecucion: y.fechaEjecucion,
-							Cantidad: y.Cantidad,
+							Cantidad: y.cantidad,
 							PrecioEjecucion: y.precioEjecucion
 							//no existe precio de instroduccion por que se calcula segun el instrumento
 							//No se si esto este bien, pero bueno, es un MVP
 						}
+
+						let rentabilidad = calcularRentabilidad(y.precioEjecucion, instrumento.PrecioApertura, y.cantidad)
+
+						retorno = {
+							...retorno,
+							Rentabilidad: rentabilidad
+						}
+
+						return retorno
 					})
 				}
 			}
@@ -169,7 +178,7 @@ exports.obtenerInstrumento = async (client, idInstrumento, fields) => {
 	instrumentos.Nombre = instrumentosDB[0].nombre
 	instrumentos.PrecioApertura = instrumentosDB[0].precioApertura
 	instrumentos.PrecioCierre = instrumentosDB[0].precioCierre
-	instrumentos.Codigo = instrumentosDB[0].codig
+	instrumentos.Codigo = instrumentosDB[0].codigo
 
 	return instrumentos;
 
@@ -223,7 +232,7 @@ exports.obtenerInversiones = async (client, email, fields) => {
 				estadoOrden = estadoOrdenDB[0].descripcion
 			}
 
-			return {
+			let retorno = {
 				Id: y.id,
 				IdCartera: y.idCartera,
 				TipoOrden: tipoOrden,
@@ -231,11 +240,20 @@ exports.obtenerInversiones = async (client, email, fields) => {
 				EstadoOrden: estadoOrden,
 				FechaInstroduccion: y.fechaInstroduccion,
 				FechaEjecucion: y.fechaEjecucion,
-				Cantidad: y.Cantidad,
+				Cantidad: y.cantidad,
 				PrecioEjecucion: y.precioEjecucion
 				//no existe precio de instroduccion por que se calcula segun el instrumento
 				//No se si esto este bien, pero bueno, es un MVP
 			}
+
+			let rentabilidad = calcularRentabilidad(y.precioEjecucion, instrumento.PrecioApertura, y.cantidad)
+
+			retorno = {
+				...retorno,
+				Rentabilidad: rentabilidad
+			}
+
+			return retorno
 		})
 	}
 
@@ -304,12 +322,16 @@ exports.obtenerInversion = async (client, idInversion, fields) => {
 	//no existe precio de instroduccion por que se calcula segun el instrumento
 	//No se si esto este bien, pero bueno, es un MVP
 
+	let rentabilidad = calcularRentabilidad(inversionesDB[0].precioEjecucion, instrumento.PrecioApertura, inversionesDB[0].cantidad)
+
+	ordenInversiones.Rentabilidad = rentabilidad
+
 	return ordenInversiones;
 
 }
 
 exports.obtenerCartera = async (client, idCartera, fields) => {
-	let cartera = [];
+	let cartera = {};
 
 	let carteraClientesDB = await client.query(`
 		SELECT * FROM cartera
@@ -363,7 +385,7 @@ exports.obtenerCartera = async (client, idCartera, fields) => {
 						estadoOrden = estadoOrdenDB[0].descripcion
 					}
 
-					return {
+					let retorno = {
 						Id: y.id,
 						IdCartera: y.idCartera,
 						TipoOrden: tipoOrden,
@@ -371,20 +393,120 @@ exports.obtenerCartera = async (client, idCartera, fields) => {
 						EstadoOrden: estadoOrden,
 						FechaInstroduccion: y.fechaInstroduccion,
 						FechaEjecucion: y.fechaEjecucion,
-						Cantidad: y.Cantidad,
+						Cantidad: y.cantidad,
 						PrecioEjecucion: y.precioEjecucion
 						//no existe precio de instroduccion por que se calcula segun el instrumento
 						//No se si esto este bien, pero bueno, es un MVP
 					}
+
+					let rentabilidad = calcularRentabilidad(y.precioEjecucion, instrumento.PrecioApertura, y.cantidad)
+
+					retorno = {
+						...retorno,
+						Rentabilidad: rentabilidad
+					}
+
+					return retorno
 				})
 			}
 		}
 
-		cartera.Id = carteraClientesDB[0].id,
-			cartera.IdUsuario = carteraClientesDB[0].idUsuario,
-			cartera.Descripcion = carteraClientesDB[0].descripcion,
-			cartera.EstadoActivo = carteraClientesDB[0].estadoActivo,
-			cartera.OrdenInversiones = ordenInversiones
+		cartera.Id = carteraClientesDB[0].id
+		cartera.IdUsuario = carteraClientesDB[0].idUsuario
+		cartera.Descripcion = carteraClientesDB[0].descripcion
+		cartera.EstadoActivo = carteraClientesDB[0].estadoActivo
+		cartera.OrdenInversiones = ordenInversiones
+	}
+
+	return cartera;
+
+}
+
+exports.obtenerCarteras = async (client, idUsuario, fields) => {
+	let cartera = [];
+
+	let carteraClientesDB = await client.query(`
+		SELECT * FROM cartera
+		WHERE idUsuario = ?
+	`, [idUsuario])
+
+	if (carteraClientesDB.length > 0) {
+
+		cartera = await Promise.all(carteraClientesDB.map(async x => {
+			let ordenInversiones = []
+
+			let inversionesDB = await client.query(`
+				SELECT * FROM ordenInversiones WHERE idCartera = ?
+			`, [x.id])
+
+			if (inversionesDB.length > 0) {
+				ordenInversiones = await Promise.all(inversionesDB.map(async y => {
+					let tipoOrden = "", instrumento = {}, estadoOrden = ""
+
+					let tipoOrdenDB = await client.query(`
+						SELECT descripcion FROM tipoOrden WHERE id = ?
+					`, [y.idTipoOrden])
+
+					if (tipoOrdenDB.length > 0) {
+						tipoOrden = tipoOrdenDB[0].descripcion
+					}
+
+					let instrumentosDB = await client.query(`
+							SELECT * FROM instrumentos WHERE id = ?
+						`, [y.idInstrumento])
+
+					if (instrumentosDB.length > 0) {
+						instrumento = {
+							Id: instrumentosDB[0].id,
+							Nombre: instrumentosDB[0].nombre,
+							PrecioApertura: instrumentosDB[0].precioApertura,
+							PrecioCierre: instrumentosDB[0].precioCierre,
+							Codigo: instrumentosDB[0].codigo,
+						}
+					}
+
+					let estadoOrdenDB = await client.query(`
+						SELECT descripcion FROM estadoOrden WHERE id = ?
+					`, [y.idEstadoOrden])
+
+					if (estadoOrdenDB.length > 0) {
+						estadoOrden = estadoOrdenDB[0].descripcion
+					}
+
+					let retorno = {
+						Id: y.id,
+						IdCartera: y.idCartera,
+						TipoOrden: tipoOrden,
+						Instrumento: instrumento,
+						EstadoOrden: estadoOrden,
+						FechaInstroduccion: y.fechaInstroduccion,
+						FechaEjecucion: y.fechaEjecucion,
+						Cantidad: y.cantidad,
+						PrecioEjecucion: y.precioEjecucion
+						//no existe precio de instroduccion por que se calcula segun el instrumento
+						//No se si esto este bien, pero bueno, es un MVP
+					}
+
+					let rentabilidad = calcularRentabilidad(y.precioEjecucion, instrumento.PrecioApertura, y.cantidad)
+
+					retorno = {
+						...retorno,
+						Rentabilidad: rentabilidad
+					}
+
+					return retorno
+				}))
+			}
+
+			return {
+				Id: x.id,
+				IdUsuario: x.idUsuario,
+				Descripcion: x.descripcion,
+				EstadoActivo: x.estadoActivo,
+				OrdenInversiones: ordenInversiones
+			}
+		}))
+
 	}
 
 	return cartera;
@@ -429,27 +551,92 @@ exports.obtenerTipoOrden = async (client, idTipoOrden, fields) => {
 	return tipoOrden;
 }
 
-exports.obtenerInversionPorInstrumento = async (client, fields) => {
-	let instrumentos = [];
+exports.obtenerInversionPorInstrumento = async (client, { idCartera, idInstrumento }, fields) => {
 
-	let instrumentosDB = await client.query(`
-        SELECT * FROM instrumentos
-    `, [])
+	let ordenInversiones = []
 
-	if (instrumentosDB.length == 0) {
-		return instrumentos;
+	let inversionesDB = await client.query(`
+		SELECT o.* FROM ordenInversiones AS o
+		LEFT JOIN cartera AS c ON c.id = o.idCartera
+		LEFT JOIN usuarios AS u ON u.id = c.IdUsuario
+		LEFT JOIN instrumentos AS i ON i.id = o.idInstrumento
+		WHERE c.id = ? AND i.id = ?
+	`, [idCartera, idInstrumento])
+
+	if (inversionesDB.length > 0) {
+		ordenInversiones = await Promise.all(inversionesDB.map(async y => {
+			let tipoOrden = "", instrumento = {}, estadoOrden = ""
+
+			let tipoOrdenDB = await client.query(`
+				SELECT descripcion FROM tipoOrden WHERE id = ?
+			`, [y.idTipoOrden])
+
+			if (tipoOrdenDB.length > 0) {
+				tipoOrden = tipoOrdenDB[0].descripcion
+			}
+
+			if (fields.Instrumento) {
+
+				let instrumentosDB = await client.query(`
+					SELECT * FROM instrumentos WHERE id = ?
+				`, [y.idInstrumento])
+
+				if (instrumentosDB.length > 0) {
+					instrumento = {
+						Id: instrumentosDB[0].id,
+						Nombre: instrumentosDB[0].nombre,
+						PrecioApertura: instrumentosDB[0].precioApertura,
+						PrecioCierre: instrumentosDB[0].precioCierre,
+						Codigo: instrumentosDB[0].codigo,
+					}
+				}
+			}
+
+			let estadoOrdenDB = await client.query(`
+				SELECT descripcion FROM estadoOrden WHERE id = ?
+			`, [y.idEstadoOrden])
+
+			if (estadoOrdenDB.length > 0) {
+				estadoOrden = estadoOrdenDB[0].descripcion
+			}
+
+			let retorno = {
+				Id: y.id,
+				IdCartera: y.idCartera,
+				TipoOrden: tipoOrden,
+				Instrumento: instrumento,
+				EstadoOrden: estadoOrden,
+				FechaInstroduccion: y.fechaInstroduccion,
+				FechaEjecucion: y.fechaEjecucion,
+				Cantidad: y.cantidad,
+				PrecioEjecucion: y.precioEjecucion
+				//no existe precio de instroduccion por que se calcula segun el instrumento
+				//No se si esto este bien, pero bueno, es un MVP
+			}
+
+			let rentabilidad = calcularRentabilidad(y.precioEjecucion, instrumento.PrecioApertura, y.cantidad)
+
+			retorno = {
+				...retorno,
+				Rentabilidad: rentabilidad
+			}
+
+			return retorno
+		}))
+
 	}
 
-	instrumentos = instrumentosDB.map(x => {
-		return {
-			Id: x.id,
-			Nombre: x.nombre,
-			PrecioApertura: x.precioApertura,
-			PrecioCierre: x.precioCierre,
-			Codigo: x.codigo
-		}
-	});
+	return ordenInversiones;
 
-	return instrumentos;
+}
 
+const calcularRentabilidad = (precioEjecucion, precioApertura, cantidad) => {
+	//Calculamos rentabilidad : Rentabilidad = (Ganancia / Inversión) x 100
+	// Ganancia = instrumento.precioApertura * Cantidad
+	// Inversión = precioEjecucion * Cantidad
+	let inversion = precioEjecucion * cantidad
+	let ganancia = (precioApertura * cantidad) - inversion
+	let rentabilidad = (ganancia / inversion) * 100
+
+	return rentabilidad
 }

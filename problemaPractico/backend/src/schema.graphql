@@ -64,11 +64,17 @@ type OrdenInversiones {
 	FechaEjecucion: String
 	Cantidad: Int
 	PrecioEjecucion: Float
+	Rentabilidad: Float
 }
 
 type TipoOrden {
 	Id: Int
 	Descripcion: String
+}
+
+type GanaciaPerdidaCartera {
+	Email: String
+	Resultado: Float
 }
 
 type Query {
@@ -79,10 +85,13 @@ type Query {
 	obtenerInstrumento(idInstrumento: Int!): Instrumento
 	obtenerInversiones(email: String!): [OrdenInversiones]
 	obtenerInversion(idInversion: Int!): OrdenInversiones
+	obtenerInversionPorInstrumento(idCartera: Int!, idInstrumento: Int!): [OrdenInversiones]
 	obtenerCartera(idCartera: Int!): Cartera
+	obtenerCarteras(email: String!): [Cartera]
 	obtenerTodosLosTipoOrden: [TipoOrden]
 	obtenerTipoOrden(idTipoOrden: Int!): TipoOrden
-	
+	obtenerHistoricoGananciasPerdidasCartera(email: String!): GanaciaPerdidaCartera
+	compararHistoricoGananciasPerdidasCarteraUsuarioAB(emailUsuarioA: String!, emailUsuarioB: String!): [GanaciaPerdidaCartera]
 }
 
 type Mutation {
