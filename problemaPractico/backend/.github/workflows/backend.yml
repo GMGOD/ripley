@@ -4,7 +4,7 @@ on:
     branches:
       - master
 
-name: CI/CD QA
+name: CI/CD QA backend
 
 # https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 env:
@@ -35,15 +35,15 @@ jobs:
     
     - name: Set env file 🎓
       run: |
-          echo ${{ env.ENVIROMENTFILE }} | base64 -d > ./.env
+          echo ${{ env.ENVIROMENTFILE }} | base64 -d > ./problemaPractico/backend/.env
 
     - name: Build and tag the image 🌔
       run: |
         # Build and tag the image 🎓
         docker build \
-          -t $CONTAINER_IMAGE \
-          -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./ \
-          -f ./dockerfile
+          -t $CONTAINER_IMAGE ./problemaPractico/backend/ \
+          -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE \
+          -f ./problemaPractico/backend/dockerfile
  
     - name: Push to ecr AWS ⏭
       if: github.ref == 'refs/heads/master'

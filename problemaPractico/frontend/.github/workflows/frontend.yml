@@ -1,0 +1,66 @@
+# build.yml
+on:
+  push:
+    branches:
+      - master
+
+name: CI/CD QA frontend
+
+# https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_DEFAULT_OUTPUT: json
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+  ENVIROMENTFILE: ${{ secrets.ENVIROMENT }}
+  REGION: ${{ secrets.REGION }}
+  PROJECT: frontend
+  CONTAINER_IMAGE: frontend:${{ github.sha }}
+  
+jobs:
+  build-and-push:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout 🛎️
+      uses: actions/checkout@master
+      
+    - name: Setup ECR 🔧
+      run: |
+        # Login to AWS ECR
+        docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+    
+    - name: Set env file 🎓
+      run: |
+          echo ${{ env.ENVIROMENTFILE }} | base64 -d > ./problemaPractico/frontend/.env
+
+    - name: Build and tag the image 🌔
+      run: |
+        # Build and tag the image 🎓
+        docker build \
+          -t $CONTAINER_IMAGE ./problemaPractico/frontend/ \
+          -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE \
+          -f ./problemaPractico/frontend/dockerfile
+ 
+    - name: Push to ecr AWS ⏭
+      if: github.ref == 'refs/heads/master'
+      run: |
+        # Push image to AWS ECR
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
+
+    - name: AWS Credentials 🐒
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.REGION }}
+
+    - name: Trigger deploy 🚀
+      uses: equipotoctoc/kubernetes-action@main
+      env:
+        KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+      with:
+        args: --record deployment.apps/${{ env.PROJECT }} set image deployment.apps/${{ env.PROJECT }} ${{ env.PROJECT }}=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.PROJECT }}:${{ github.sha }}

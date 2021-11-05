@@ -428,3 +428,28 @@ exports.obtenerTipoOrden = async (client, idTipoOrden, fields) => {
 
 	return tipoOrden;
 }
+
+exports.obtenerInversionPorInstrumento = async (client, fields) => {
+	let instrumentos = [];
+
+	let instrumentosDB = await client.query(`
+        SELECT * FROM instrumentos
+    `, [])
+
+	if (instrumentosDB.length == 0) {
+		return instrumentos;
+	}
+
+	instrumentos = instrumentosDB.map(x => {
+		return {
+			Id: x.id,
+			Nombre: x.nombre,
+			PrecioApertura: x.precioApertura,
+			PrecioCierre: x.precioCierre,
+			Codigo: x.codigo
+		}
+	});
+
+	return instrumentos;
+
+}

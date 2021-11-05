@@ -95,3 +95,22 @@ exports.obtenerTipoOrden = async (_, { idTipoOrden }, context, info) => {
     return resp
 
 }
+
+exports.obtenerInversionPorInstrumento = async (_, { idCartera, idInstrumento }, context, info) => {
+
+    let cartera = await aurora.obtenerCartera(mysql, idCartera, graphqlFields(info))
+    let instrumento = await aurora.obtenerInstrumento(mysql, obj.input.IdInstrumento, graphqlFields(info))
+
+    if (!cartera || Object.keys(cartera) === 0) {
+        throw `Cartera ${obj.input.IdCartera} no existe`
+    }
+
+    if (!instrumento || Object.keys(instrumento) === 0) {
+        throw `Instrumento ${obj.input.IdInstrumento} no existe`
+    }
+
+    let resp = await aurora.obtenerInversionPorInstrumento(mysql, { idCartera, idInstrumento }, graphqlFields(info))
+
+    return resp
+
+}
