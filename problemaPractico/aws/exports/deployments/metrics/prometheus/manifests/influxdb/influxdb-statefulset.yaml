@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: influxdb
+  namespace: monitoring   
+spec:
+  serviceName: "influxdb"
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      serviceAccount: cthulhu    
+      containers:
+      - name: influxdb
+        image: quay.io/influxdb/influxdb:v2.0.3
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: 1000m
+        ports:
+        - name: api
+          containerPort: 9999
+        - name: gui
+          containerPort: 8086
+        volumeMounts:
+        - name: influxdb-storage
+          mountPath: /root/.influxdbv2
+      volumes:
+        - name: influxdb-storage
+          persistentVolumeClaim:
+            claimName: influxdb-storage

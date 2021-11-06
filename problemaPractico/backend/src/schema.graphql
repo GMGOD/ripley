@@ -1,0 +1,109 @@
+input UsuarioInput {
+	Nombre: String
+	Email: String!
+}
+
+input ModificarUsuarioInput {
+	Id: Int!
+	Nombre: String
+	Email: String!
+}
+
+input CarteraInput {
+	Email: String!
+	Descripcion: String
+}
+
+input Invertir {
+	IdCartera: Int!
+	IdTipoOrden: Int!
+	IdInstrumento: Int!
+	Cantidad: Int!
+	Precio: Float!
+}
+
+input ModificarInversion {
+	IdInversion: Int!
+	Cantidad: Int!
+	Precio: Float!
+}
+
+type Usuario {
+	Id: Int
+	Nombre: String
+	Email: String
+}
+
+type BasicResponse {
+	Success: Boolean
+}
+
+type Instrumento {
+	Id: Int
+	Nombre: String
+	PrecioApertura: Float
+	PrecioCierre: Float
+	Codigo: String
+}
+
+type Cartera {
+	Id: Int
+	IdUsuario: Int
+	Descripcion: String
+	EstadoActivo: Boolean
+	OrdenInversiones: [OrdenInversiones]
+}
+
+type OrdenInversiones {
+	Id: Int
+	IdCartera: Int
+	TipoOrden: String
+	Instrumento: Instrumento
+	EstadoOrden: String
+	FechaInstroduccion: String
+	FechaEjecucion: String
+	Cantidad: Int
+	PrecioEjecucion: Float
+	Rentabilidad: Float
+}
+
+type TipoOrden {
+	Id: Int
+	Descripcion: String
+}
+
+type GanaciaPerdidaCartera {
+	Email: String
+	Resultado: Float
+}
+
+type Query {
+	obtenerUsuario(email: String!): Usuario
+	obtenerTodosLosUsuarios: [Usuario]
+	obtenerTodasMisInversiones(email: String!): [Cartera]
+	obtenerInstrumentos: [Instrumento]
+	obtenerInstrumento(idInstrumento: Int!): Instrumento
+	obtenerInversiones(email: String!): [OrdenInversiones]
+	obtenerInversion(idInversion: Int!): OrdenInversiones
+	obtenerInversionPorInstrumento(idCartera: Int!, idInstrumento: Int!): [OrdenInversiones]
+	obtenerCartera(idCartera: Int!): Cartera
+	obtenerCarteras(email: String!): [Cartera]
+	obtenerTodosLosTipoOrden: [TipoOrden]
+	obtenerTipoOrden(idTipoOrden: Int!): TipoOrden
+	obtenerHistoricoGananciasPerdidasCartera(email: String!): GanaciaPerdidaCartera
+	compararHistoricoGananciasPerdidasCarteraUsuarioAB(emailUsuarioA: String!, emailUsuarioB: String!): [GanaciaPerdidaCartera]
+}
+
+type Mutation {
+	crearUsuario(input: UsuarioInput!): Usuario
+	modificarUsuario(input: ModificarUsuarioInput!): Usuario
+	actualizarInstrumentos: [Instrumento]
+	crearCartera(input: CarteraInput!): Cartera
+	invertir(input: Invertir!): OrdenInversiones
+	modificarInversion(input: ModificarInversion!): OrdenInversiones
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}

@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+    host: ripley
+  name: nginx
+  selfLink: /api/v1/namespaces/default/services/nginx
+  annotations:
+    
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:250359480282:certificate/03cf3269-6cf5-4aa4-9840-de4621755464
+    
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+    host: ripley
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer: {}
