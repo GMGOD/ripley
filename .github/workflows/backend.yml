@@ -36,7 +36,7 @@ jobs:
     
     - name: Set env file 🎓
       run: |
-          echo ${{ env.ENVIROMENTFILE }} | base64 -d > .$FOLDER/.env
+          echo ${{ env.ENVIROMENTFILE }} | base64 -d > $FOLDER/.env
 
     - name: Build and tag the image 🌔
       run: |
