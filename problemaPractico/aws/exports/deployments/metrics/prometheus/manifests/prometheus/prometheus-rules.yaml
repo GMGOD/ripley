@@ -1761,3 +1761,58 @@ spec:
       for: 10m
       labels:
         severity: warning
+  - name: apdex
+    rules:
+    # xample of Apdex calculation and alerting with prometheus
+    - record: job:http_apdex_target_seconds:max
+      expr: max(http_request_apdex_target_seconds) BY (job)
+
+    - record: job_le:http_request_apdex_target_seconds:max
+      expr: |
+        clamp_max(
+          count_values(
+            "le",
+            job:http_apdex_target_seconds:max
+          ) BY (job),
+          1)
+    - record: job_le:http_request_apdex_target_seconds:4_times_max
+      expr: |
+        clamp_max(
+          count_values(
+            "le",
+            job:http_apdex_target_seconds:max * 4
+          ) BY (job),
+          1)
+    - record: job:http_request_apdex:max
+      expr: |
+        (
+          sum(
+            rate(
+              http_request_duration_seconds_bucket{handler!="/healthz",code!~"5.."}[1m]
+            )
+            * ON(job, le) GROUP_LEFT()
+            job_le:http_request_apdex_target_seconds:max
+          ) BY (job)
+          +
+          sum(
+            rate(
+              http_request_duration_seconds_bucket{handler!="/healthz",code!~"5.."}[1m]
+            )
+            * ON(job, le) GROUP_LEFT()
+            job_le:http_request_apdex_target_seconds:4_times_max
+          ) BY (job)
+        )
+        /
+        2
+        /
+        sum(
+          rate(
+            http_request_duration_seconds_count{handler!="/healthz"}[1m]
+          )
+        ) BY (job)
+    - alert: HTTPApdexViolation
+      expr: job:http_request_apdex:max < 0.8
+      for: 5m
+      annotations:
+        description: |
+          '{{ $labels.job }} has ApDex has dropped below 0.8 {{printf "%.2f" $value}}'

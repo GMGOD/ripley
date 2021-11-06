@@ -5,5 +5,5 @@ COPY configs/securityHttps.conf /etc/nginx/securityHttps.conf
 COPY configs/securityHeaders.conf /etc/nginx/securityHeaders.conf
 COPY configs/robots.conf /etc/nginx/robots.conf
 
-COPY configs/sites/backend.default.conf /etc/nginx/sites-available/backend.default.conf
-COPY configs/sites/frontend.default.conf /etc/nginx/sites-available/frontend.default.conf
+COPY sites/backend.default.conf /etc/nginx/sites-available/backend.default.conf
+COPY sites/frontend.default.conf /etc/nginx/sites-available/frontend.default.conf

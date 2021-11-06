@@ -20,6 +20,9 @@ recordar que el perfil que coloques tiene que tener acceso a eks:CreateCluster s
 
 Crear el nodegroup ./aws/scripts/nodegroup.sh
 
+## Crear repositorios ECR
+![](./backend/imagenes/ECR.png)
+
 ## Diagrama Arquitectura
 
 ## Diagrama Base de datos
