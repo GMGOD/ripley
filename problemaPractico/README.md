@@ -1,58 +1,89 @@
 # Problema practico
 
-Resolucion del problema practico planteado en el readme principal
+Resolucion del problema practico planteado en el [readme principal](https://github.com/GMGOD/ripley/blob/master/README.md)
 
 # Motivacion
 
 Crear arquitectura y proyectosa asociados a la prueba practica
 
 # Resumen
-Para resumir, entre todas las tareas, las que se abordaron fueron la de arquitectura, backend y frontend.
+Para resumir, entre todas las tareas, las que se abordaron fueron la de arquitectura, backend y frontend. Lo que quedaria pendiente ya que no se realizo al 100% seria el frontend en angular.
 
 ### Oportunidad de mejora:
 - La logica para obtener los instrumentos no queda muy clara o como realizar la logica de esta, por tal existe una oportunidad de mejora para tener un historial de instrumentos.
 - Cron para obtener instrumentos; la api para actualizar los instrumentos esta hecha, es cosa de crear un Cron que llame a esta api cada X tiempo, recomiendo realizar un proyecto "crons" en node.js y que realize esta llamada cada X tiempo.
-- Existe una tabla "usuariohistorico"; la idea es 1 vez al mes con un cron rellenar esta tabla con el resultado mensual del usuario, o el diario, como se quiera, esto para evitar realizar querys pesadas en la base de datos.
+- Existe una tabla "usuarioHistorico"; la idea es 1 vez al mes con un cron rellenar esta tabla con el resultado mensual del usuario, o el diario, como se quiera, esto para evitar realizar querys pesadas en la base de datos.
 - Agregarle usuario y contraseña a la pagina, para evitar que usuarios externos sin credenciales se conecten.
+- prometheus: Esto no se instalo por que el nodeGroup ripley es de tipo t3.small y el numero de nodos que acepta AWS para este tipo de imagenes no nos alcanza para instalar todo, pero como instructivo para probarlo; Dentro de la carpeta [./aws/exports/deployments/metrics/](https://github.com/GMGOD/ripley/tree/master/problemaPractico/aws/exports/deployments/metrics) existe una carpeta llamada prometheus, este aplicativo nos sirve para revisar metrics con grafana, existe un archivo llamada [hack.sh](https://github.com/GMGOD/ripley/blob/master/problemaPractico/aws/exports/deployments/metrics/prometheus/hack.sh) para realizar la instalacion completa.
 
 ### Que falto:
-- El Frontend se realizo en Angular ya que es lo que solicitaban, pero yo no tengo experiencia con el, de igual manera me propuse a realizarlo, en resumen, se hizo el Listar todos los usuarios, agregar usuario, modificar usuario y comprar inversiones, todo lo demas se omitio por tiempo.
+- El Frontend se realizo en Angular ya que es lo que solicitaban, pero yo no tengo experiencia con el, de igual manera me propuse a realizarlo, en resumen, se hizo, listar todos los usuarios, agregar usuario, modificar usuario y comprar inversiones, todo lo demas se omitio por tiempo.
 - En un punto se solicita utilizar Api Gateway, se intento crear una llamando a un NLB (Network Load Balancer) para llamar al EKS, pero sin exito, por tal se opto por el balanceador creado por kubernetes, se puede ver como quedo en el diagrama de arquitectura.
 
 # Arquitectura
 
 Para levantar la arquitectura es necesario definir ciertas cosas antes de crearla, en este caso solo se uso serverless para crear permisos necesarios
 
-ir a la carpeta ./aws/yml/ y ejecutarla
+ir a la carpeta [./aws/yml/](https://github.com/GMGOD/ripley/tree/master/problemaPractico/aws/yml) y ejecutar
 
 ``$ sls deploy --stage prod --aws-profile=TuPerfil``
 
-tomar el rol creado y pasarlo al archivo ./aws/scripts/cluster.sh donde corresponde, cambiar el --profile por el que corresponda
+tomar el rol creado y pasarlo al archivo [./aws/scripts/cluster.sh](https://github.com/GMGOD/ripley/blob/master/problemaPractico/aws/scripts/cluster.sh) y tambien cambiar el --profile por el que tengas configurado, si no tienes ninguno, el profile seria 'default'
 
 recordar que el perfil que coloques tiene que tener acceso a eks:CreateCluster si no dara error, por tal tambien se crea un rol kubernetesUserRole para asignarle al usuario, pero igual sera necesario agregar el eks:CreateCluster
 
-Crear el nodegroup ./aws/scripts/nodegroup.sh
+Crear el nodegroup [./aws/scripts/nodegroup.sh](https://github.com/GMGOD/ripley/blob/master/problemaPractico/aws/scripts/nodegroup.sh)
 
 ## Crear repositorios ECR
-![](./backend/imagenes/ECR.png)
+![](./imagenes/ECR.png)
 
 ## Diagrama Arquitectura
-
+![](./imagenes/ripleyProblemaPractico.drawio.png)
 
 ## Diagrama Base de datos
+![](./imagenes/diagramaDBO.png)
 
 # Backend
+
+Como ejecutar, sobre carpeta [problemaPractico](https://github.com/GMGOD/ripley/tree/master/problemaPractico) si estoy en linux
+```
+cd backend
+npm i
+npm run start:local
+```
+en windows
+```
+cd backend
+npm i
+npm run start:windows:local
+```
+dentro de el archivo .env esta la conexion a la database mysql, se debe instalar [mariadb](https://www.mariadbtutorial.com/getting-started/install-mariadb/), se debe ejecutar sobre la base de datos el archivo problemaPractico/inversiones.sql
 
 El backend esta creado con node js y graphql, para realizar querys se puede hacer un post a ```http://localhost:4502/graphql```
 
 Si queremos ver la documentacion, podemos ingresar directo a la ruta del post y nos mostrara apollo para crear querys, ver el esquema y la documentacion
 
-![](./backend/imagenes/apollo.png)
+![](./imagenes/apollo.png)
 
 Tambien estan publicadas en postman todos los post's y querys disponibles https://documenter.getpostman.com/view/3489080/UVC2GoqL
 
-[![](./backend/imagenes/postman.png)](https://documenter.getpostman.com/view/3489080/UVC2GoqL)
+[![](./imagenes/postman.png)](https://documenter.getpostman.com/view/3489080/UVC2GoqL)
 
+# Frontend
+
+Como ejecutar, sobre carpeta [problemaPractico](https://github.com/GMGOD/ripley/tree/master/problemaPractico)
+```
+cd frontend-angular
+npm i
+npm run start
+```
+luego ir a [http://localhost:4200/](http://localhost:4200/)
+
+# Lineamientos de desarrollo
+- Si queremos separar las aguas, implementar otro backend, recomiendo usar graphql y sacar su potencial, ya que podemos unir diferentes endpoints y entregarlos desde 1 graphql, por tal, podemos adjuntar diferentes fuentes de información en 1 solo backend.
+- Si estamos trabajando con una APP mobile intentar reducir el tamaño de las querys a graphql para no realizar querys sin sentido a la base de datos (usar fields requeridos y entregar la info que se necesita).
+- realizar subidas por medio de actions en github, si es un proyecto nuevo, implementarlo desde actions, bloquear los push a ramas principales como "desarrollo", "produccion" y realizar pull request's para revision y validación.
+- a nivel de nginx bloquear URL's privadas que se utilizen con crons u otros, recordar que nginx define salida a internet y no los servicios.
 
 # Respuestas
 
@@ -142,7 +173,7 @@ mutation modificarInversion {
 ```
 
 - Feature 4 (¿Como van mis inversiones en Colbun S.A?): Obtener el estado (Rentabilidad y estado de inversión) de un instrumento en particular de la cartera.
-```"Obtiene todas las ordenes asiganadas a la cartera y instrumento"```
+```"* Obtiene todas las ordenes asiganadas a la cartera y instrumento"```
 
 ```
 query obtenerInversionPorInstrumento {

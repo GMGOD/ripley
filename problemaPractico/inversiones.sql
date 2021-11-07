@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 100501
 File Encoding         : 65001
 
-Date: 2021-11-05 22:13:26
+Date: 2021-11-07 18:52:58
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -154,11 +154,16 @@ CREATE TABLE `usuarios` (
   `nombre` varchar(100) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   PRIMARY KEY (`id`,`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of usuarios
 -- ----------------------------
-INSERT INTO `usuarios` VALUES ('1', 'Risopatron', 'gerar1do.m1anuel@gma123il.com');
-INSERT INTO `usuarios` VALUES ('2', 'Risopatron', 'gerardo.manuel@gmail.com');
-INSERT INTO `usuarios` VALUES ('3', 'Risopatron', 'gerardo.manuel3@gmail.com');
+INSERT INTO `usuarios` VALUES ('1', 'Yeral', 'gerardo.manuel1@gmail.com');
+INSERT INTO `usuarios` VALUES ('2', 'Gerardo', 'gerardo.manuel@gmail.com');
+INSERT INTO `usuarios` VALUES ('3', 'Gerardo', 'gerardo.manuel3@gmail.com');
+INSERT INTO `usuarios` VALUES ('4', '', '1');
+INSERT INTO `usuarios` VALUES ('5', '123123', '123123');
+INSERT INTO `usuarios` VALUES ('6', '', '333333');
+INSERT INTO `usuarios` VALUES ('7', '', '5555');
+INSERT INTO `usuarios` VALUES ('8', '', '7868678');
