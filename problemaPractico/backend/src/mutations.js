@@ -47,6 +47,11 @@ exports.crearUsuario = async (_, obj, context, info) => {
 
 exports.modificarUsuario = async (_, obj, context, info) => {
 
+    let selectEmail = await mysql.query('SELECT id FROM usuarios WHERE email = ? AND id <> ?', [obj.input.Email, obj.input.Id])
+    if (selectEmail.length > 0) {
+        throw `Usuario ya existe`
+    }
+
     let select = await mysql.query('SELECT id FROM usuarios WHERE id = ?', [obj.input.Id])
 
     if (select.length == 0) {
