@@ -236,7 +236,10 @@ exports.compararHistoricoGananciasPerdidasCarteraUsuarioAB = async (_, { emailUs
         })
 
     } else {
-        resp.push({})
+        resp.push({
+            Email: emailUsuarioA,
+            Resultado: 0
+        })
     }
 
     if (carteraB && carteraB.length > 0) {
@@ -263,7 +266,10 @@ exports.compararHistoricoGananciasPerdidasCarteraUsuarioAB = async (_, { emailUs
         })
 
     } else {
-        resp.push({})
+        resp.push({
+            Email: emailUsuarioB,
+            Resultado: 0
+        })
     }
 
     return resp

@@ -2,7 +2,7 @@
 
 <div *ngIf="isTwoSelected(); then thenBlock"></div>
 <ng-template #thenBlock>
-  <button mat-stroked-button color="warn" (click)="comparar()">Comparar</button>
+  <button mat-stroked-button color="warn" (click)="comparar()">Comparar Ganacias/Perdidas</button>
 </ng-template>
 <ng-template #elseBlock></ng-template>
 
@@ -41,12 +41,48 @@
     </ng-container>
 
     <ng-container matColumnDef="modificar">
-      <th mat-header-cell *matHeaderCellDef> Modificar </th>
+      <th mat-header-cell *matHeaderCellDef> </th>
       <td mat-cell>
         <button mat-button color="warn" *matCellDef="let element" (click)="modificarUsuario(element.Id)">Modificar</button>
       </td>
     </ng-container>
+
+    <ng-container matColumnDef="cartera">
+      <th mat-header-cell *matHeaderCellDef>  </th>
+      <td mat-cell>
+        <button mat-button color="warn" *matCellDef="let element" (click)="verCartera(element.Id)">Ver Cartera</button>
+      </td>
+    </ng-container>
+
+    <!-- <ng-container matColumnDef="otra">
+      <th mat-header-cell *matHeaderCellDef> Otra </th>
+      <td mat-cell>
+        <button mat-button color="warn" *matCellDef="let element" (click)="verCartera(element.Id)">Ver Cartera</button>
+      </td>
+    </ng-container> -->
   
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+
+<div *ngIf="comprarUsuarios; then thenBlockComparacion"></div>
+<ng-template #thenBlockComparacion>
+  <mat-card>
+    <table mat-table [dataSource]="comprarUsuarios" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> # </th>
+        <td mat-cell *matCellDef="let element"> {{element.Email}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="resultado">
+        <th mat-header-cell *matHeaderCellDef> # </th>
+        <td mat-cell *matCellDef="let element"> $ {{element.Resultado}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="comparacionColumnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: comparacionColumnas;"></tr>
+    </table>
+  </mat-card>
+</ng-template>
+<ng-template #elseBlock></ng-template>

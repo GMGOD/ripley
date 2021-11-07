@@ -12,7 +12,12 @@ export interface Usuario {
     Nombre: string;
     Email: string;
 }
- 
+
+export interface CompararUsuarios {
+    EmailA: string;
+    EmailB: string;
+}
+
 @Injectable()
 export class UsuarioService {
  
@@ -64,6 +69,19 @@ export class UsuarioService {
                   Email
                 }
               }`,
+            variables: {}
+        });
+    }
+
+    compararUsuarios(usuarios: CompararUsuarios) {
+        return this.http.post(environment.api,{
+            operationName: "compararHistoricoGananciasPerdidasCarteraUsuarioAB",
+            query: `query compararHistoricoGananciasPerdidasCarteraUsuarioAB {
+                compararHistoricoGananciasPerdidasCarteraUsuarioAB(emailUsuarioA: "${usuarios.EmailA}", emailUsuarioB: "${usuarios.EmailB}"){
+                    Email
+                    Resultado
+                }
+            }`,
             variables: {}
         });
     }

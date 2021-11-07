@@ -22,6 +22,7 @@ export interface Usuarios {
 })
 export class UsuariosComponent {
   public usuarios: any;
+  public comprarUsuarios: any;
 
   chartOption: EChartsOption = {
     xAxis: {
@@ -39,7 +40,8 @@ export class UsuariosComponent {
     }]
   }
 
-  displayedColumns: string[] = ['select','posicion', 'nombre', 'email', 'modificar'];
+  displayedColumns: string[] = ['select','posicion', 'nombre', 'email', 'modificar', 'cartera'];
+  comparacionColumnas: string[] = ['email','resultado'];
 
   selection = new SelectionModel<Usuarios>(true, []);
   
@@ -190,6 +192,39 @@ export class UsuariosComponent {
 
   comparar(){
     console.log(this.selection.selected)
+
+    if(this.selection.selected.length <= 1){
+      this.snackBarOpen("Tienes que seleccionar 2 usuarios", "Cerrar")
+      throw new Error("Seleccion no son dos usuarios");
+    }
+
+    this._usuarioService
+    .compararUsuarios({
+      EmailA: this.selection.selected[0].Email,
+      EmailB: this.selection.selected[1].Email,
+    })
+    .subscribe({
+      next: (data: any) => {
+        if(data.errors && data.errors.length > 0){
+          this.snackBarOpen(data.errors[0].message, "Cerrar")
+        } else {
+
+          this.comprarUsuarios = data.data.compararHistoricoGananciasPerdidasCarteraUsuarioAB
+
+          this.snackBarOpen("Compracion exitosa", "Cerrar")
+        }
+        
+      },
+      error: err => {
+        console.error(err)
+        this.snackBarOpen(err.toString(), "Cerrar")
+      },
+      complete: () => console.log('done loading usuarios')
+    })
+  }
+
+  verCartera(Id: number){
+    console.log('Ver cartera', Id)
   }
 }
 
