@@ -85,6 +85,9 @@ luego ir a [http://localhost:4200/](http://localhost:4200/)
 - realizar subidas por medio de actions en github, si es un proyecto nuevo, implementarlo desde actions, bloquear los push a ramas principales como "desarrollo", "produccion" y realizar pull request's para revision y validación.
 - a nivel de nginx bloquear URL's privadas que se utilizen con crons u otros, recordar que nginx define salida a internet y no los servicios.
 
+# Deployment
+Los deployments a EKS se realizan por medio de github actions, estos se activan cuando reciben un push a la rama master, esto se deja asi para hacerlo lo mas simple posible, si se quisiera separar por enviroment se crearian dos ramas, una QA y otra PROD, si alguna de estas llegase a recibir un push, se ejecuta su propio action, OJO que por medio de github secrets mantenemos nuestras llaves a AWS y enviroment.
+
 # Respuestas
 
 - Feature 1 (¿Que inversiones tengo?): Obtener todas las inversiones (Instrumentos y cantidad de acciones) de la cartera del señor Risopatron.
