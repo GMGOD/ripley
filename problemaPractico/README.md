@@ -22,9 +22,9 @@ Para resumir, entre todas las tareas, las que se abordaron fueron la de arquitec
 
 # Arquitectura
 
-Para levantar la arquitectura es necesario definir ciertas cosas antes de crearla, en este caso solo se uso serverless para crear permisos necesarios
+Para levantar la arquitectura es necesario definir ciertas cosas antes de crearla, en este caso solo se uso serverless para crear permisos necesarios, por tal con [Serverless Framework](https://www.serverless.com/framework/docs/getting-started) realizamos estas acciones
 
-ir a la carpeta [./aws/yml/](https://github.com/GMGOD/ripley/tree/master/problemaPractico/aws/yml) y ejecutar
+ir a la carpeta [./aws/yml/](https://github.com/GMGOD/ripley/tree/master/problemaPractico/aws/yml) y ejecutar despues de haber instalado Serverless Framework, ojo: el --aws-profile= corresponde al perfil que tengas configurado en tu maquina, si no tienes ninguno, este seria "default"
 
 ``$ sls deploy --stage prod --aws-profile=TuPerfil``
 
