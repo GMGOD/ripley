@@ -40,17 +40,16 @@
       </button>
 
   </mat-sidenav>
+
   <mat-sidenav-content>
       <!-- <div class="content mat-elevation-z8">
           Main content here!
       </div> -->
       <mat-card>
-        <mat-tab-group>
-          <mat-tab label="Resumen inversiones"> 
-            1
-          </mat-tab>
+
+        <mat-tab-group (selectedTabChange)="cambioTab($event)" animationDuration="0ms" >
           <mat-tab label="Usuarios"> 
-            1
+            <Usuarios></Usuarios>
           </mat-tab>
           <mat-tab label="Carteras"> 
             2

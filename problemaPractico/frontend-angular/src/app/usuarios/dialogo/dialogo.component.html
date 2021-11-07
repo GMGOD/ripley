@@ -1,0 +1,19 @@
+
+<div *ngIf="data.Id; then thenBlock else elseBlock"></div>
+<ng-template #thenBlock><h1 mat-dialog-title>Cambiar datos de {{data.Nombre}}</h1></ng-template>
+<ng-template #elseBlock><h1 mat-dialog-title>Agregar usuario</h1></ng-template>
+
+<div mat-dialog-content>
+  <mat-form-field appearance="fill">
+    <mat-label>Nombre</mat-label>
+    <input matInput [(ngModel)]="data.Nombre">
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Email</mat-label>
+    <input matInput [(ngModel)]="data.Email">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Guardar</button>
+</div>

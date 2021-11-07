@@ -10,6 +10,13 @@
             "request": "launch",
             "type": "node-terminal",
             "cwd": "${workspaceFolder}/problemaPractico/backend",
+        },
+        {
+            "command": "npm run start",
+            "name": "frontend",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/problemaPractico/frontend-angular",
         }
     ]
 }

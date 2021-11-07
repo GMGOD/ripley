@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  api: "https://backend.nagaroth.net"
+  api: "https://backend.nagaroth.net/graphql"
 };
