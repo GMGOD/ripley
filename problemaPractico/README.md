@@ -6,6 +6,19 @@ Resolucion del problema practico planteado en el readme principal
 
 Crear arquitectura y proyectosa asociados a la prueba practica
 
+# Resumen
+Para resumir, entre todas las tareas, las que se abordaron fueron la de arquitectura, backend y frontend.
+
+### Oportunidad de mejora:
+- La logica para obtener los instrumentos no queda muy clara o como realizar la logica de esta, por tal existe una oportunidad de mejora para tener un historial de instrumentos.
+- Cron para obtener instrumentos; la api para actualizar los instrumentos esta hecha, es cosa de crear un Cron que llame a esta api cada X tiempo, recomiendo realizar un proyecto "crons" en node.js y que realize esta llamada cada X tiempo.
+- Existe una tabla "usuariohistorico"; la idea es 1 vez al mes con un cron rellenar esta tabla con el resultado mensual del usuario, o el diario, como se quiera, esto para evitar realizar querys pesadas en la base de datos.
+- Agregarle usuario y contraseña a la pagina, para evitar que usuarios externos sin credenciales se conecten.
+
+### Que falto:
+- El Frontend se realizo en Angular ya que es lo que solicitaban, pero yo no tengo experiencia con el, de igual manera me propuse a realizarlo, en resumen, se hizo el Listar todos los usuarios, agregar usuario, modificar usuario y comprar inversiones, todo lo demas se omitio por tiempo.
+- En un punto se solicita utilizar Api Gateway, se intento crear una llamando a un NLB (Network Load Balancer) para llamar al EKS, pero sin exito, por tal se opto por el balanceador creado por kubernetes, se puede ver como quedo en el diagrama de arquitectura.
+
 # Arquitectura
 
 Para levantar la arquitectura es necesario definir ciertas cosas antes de crearla, en este caso solo se uso serverless para crear permisos necesarios
@@ -24,6 +37,7 @@ Crear el nodegroup ./aws/scripts/nodegroup.sh
 ![](./backend/imagenes/ECR.png)
 
 ## Diagrama Arquitectura
+
 
 ## Diagrama Base de datos
 
